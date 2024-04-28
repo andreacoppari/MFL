@@ -6,7 +6,7 @@ def open_url_in_browser(url):
 
 root = tk.Tk()
 root.title("MFL - My Favourite Links")
-root.geometry("600x400")
+root.geometry("800x600")
 
 bg_color = "#f0f0f0"
 button_bg = "#4caf50"
