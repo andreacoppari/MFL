@@ -1,0 +1,41 @@
+version: "3.5"
+
+networks:
+  sermas_dev:
+    external: true
+
+services:
+  mms_stt:
+    image: sermas/mms-stt:latest-${RUNTIME:-gpu}
+    build:
+      context: .
+      dockerfile: Dockerfile.${RUNTIME:-gpu}
+
+    entrypoint: uvicorn webservice:app --host 0.0.0.0 --port 9000 --workers 1
+    restart: unless-stopped
+    networks:
+      - sermas_dev
+    environment:
+      - BASE_URL=/mms_stt
+      - PYTHONUNBUFFERED=1
+      - NVIDIA_VISIBLE_DEVICES=all  # If running on GPU
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility  # If running on GPU
+      - TMPDIR=temp_dir
+      - PYTHONPATH=.
+      - PREFIX=INFER
+      - HYDRA_FULL_ERROR=1
+      - USER=micro
+    ports:
+      - 9000:9000
+    volumes:
+      - ./data/cache/pip:/root/.cache/pip
+      - ./data/models:/models
+      - ./data/cache/temp:/tmp
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
